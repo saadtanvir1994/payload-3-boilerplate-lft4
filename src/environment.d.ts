@@ -1,14 +1,22 @@
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
-      PAYLOAD_SECRET: string
       DATABASE_URI: string
+      PAYLOAD_SECRET: string
       NEXT_PUBLIC_SERVER_URL: string
-      VERCEL_PROJECT_PRODUCTION_URL: string
+
+      GREENAPI_INSTANCE_ID: string
+      GREENAPI_API_TOKEN: string
+      GREENAPI_ADMIN_WHATSAPP: string
+
+      RESEND_API_KEY: string
+      RESEND_FROM_EMAIL: string
+      ADMIN_EMAIL: string
+
+      CRON_SECRET: string
+      WHATSAPP_ADMIN_NOTIFICATION: string
     }
   }
 }
 
-// If this file has no import/export statements (i.e. is a script)
-// convert it into a module by adding an empty export statement.
 export {}

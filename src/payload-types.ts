@@ -67,16 +67,20 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    pages: Page;
-    posts: Post;
-    media: Media;
-    categories: Category;
     users: User;
-    comments: Comment;
-    redirects: Redirect;
-    forms: Form;
-    'form-submissions': FormSubmission;
-    search: Search;
+    media: Media;
+    services: Service;
+    'service-variants': ServiceVariant;
+    slots: Slot;
+    'slot-templates': SlotTemplate;
+    bookings: Booking;
+    payments: Payment;
+    notifications: Notification;
+    'membership-cards': MembershipCard;
+    'loyalty-transactions': LoyaltyTransaction;
+    vouchers: Voucher;
+    'referral-logs': ReferralLog;
+    reviews: Review;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -84,16 +88,20 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
-    pages: PagesSelect<false> | PagesSelect<true>;
-    posts: PostsSelect<false> | PostsSelect<true>;
-    media: MediaSelect<false> | MediaSelect<true>;
-    categories: CategoriesSelect<false> | CategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
-    comments: CommentsSelect<false> | CommentsSelect<true>;
-    redirects: RedirectsSelect<false> | RedirectsSelect<true>;
-    forms: FormsSelect<false> | FormsSelect<true>;
-    'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
-    search: SearchSelect<false> | SearchSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
+    services: ServicesSelect<false> | ServicesSelect<true>;
+    'service-variants': ServiceVariantsSelect<false> | ServiceVariantsSelect<true>;
+    slots: SlotsSelect<false> | SlotsSelect<true>;
+    'slot-templates': SlotTemplatesSelect<false> | SlotTemplatesSelect<true>;
+    bookings: BookingsSelect<false> | BookingsSelect<true>;
+    payments: PaymentsSelect<false> | PaymentsSelect<true>;
+    notifications: NotificationsSelect<false> | NotificationsSelect<true>;
+    'membership-cards': MembershipCardsSelect<false> | MembershipCardsSelect<true>;
+    'loyalty-transactions': LoyaltyTransactionsSelect<false> | LoyaltyTransactionsSelect<true>;
+    vouchers: VouchersSelect<false> | VouchersSelect<true>;
+    'referral-logs': ReferralLogsSelect<false> | ReferralLogsSelect<true>;
+    reviews: ReviewsSelect<false> | ReviewsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -104,12 +112,12 @@ export interface Config {
   };
   fallbackLocale: null;
   globals: {
-    header: Header;
-    footer: Footer;
+    'booking-settings': BookingSetting;
+    'membership-tiers': MembershipTier;
   };
   globalsSelect: {
-    header: HeaderSelect<false> | HeaderSelect<true>;
-    footer: FooterSelect<false> | FooterSelect<true>;
+    'booking-settings': BookingSettingsSelect<false> | BookingSettingsSelect<true>;
+    'membership-tiers': MembershipTiersSelect<false> | MembershipTiersSelect<true>;
   };
   locale: null;
   widgets: {
@@ -141,64 +149,51 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pages".
+ * via the `definition` "users".
  */
-export interface Page {
+export interface User {
   id: number;
-  title: string;
-  hero: {
-    type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact';
-    richText?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
-    links?:
-      | {
-          link: {
-            type?: ('reference' | 'custom') | null;
-            newTab?: boolean | null;
-            reference?: {
-              relationTo: 'pages';
-              value: number | Page;
-            } | null;
-            url?: string | null;
-            label: string;
-            /**
-             * Choose how the link should be rendered.
-             */
-            appearance?: ('default' | 'outline') | null;
-          };
-          id?: string | null;
-        }[]
-      | null;
-    media?: (number | null) | Media;
-  };
-  layout: (CallToActionBlock | ContentBlock | MediaBlock | ArchiveBlock | FormBlock)[];
-  meta?: {
-    title?: string | null;
-    /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
-     */
-    image?: (number | null) | Media;
-    description?: string | null;
-  };
-  publishedAt?: string | null;
-  slug?: string | null;
-  slugLock?: boolean | null;
+  fullName: string;
+  /**
+   * Pakistani format without + prefix e.g. 923001234567
+   */
+  mobileNumber?: string | null;
+  /**
+   * Auto-set to mobileNumber on create if blank
+   */
+  whatsappNumber?: string | null;
+  /**
+   * Auto-generated REF-XXXXX
+   */
+  referralCode?: string | null;
+  /**
+   * Set at signup when referral code is used
+   */
+  referredBy?: (number | null) | User;
+  loyaltyPointsBalance?: number | null;
+  currentTier?: ('Beginner' | 'Gold' | 'Platinum') | null;
+  isActive?: boolean | null;
+  role: 'customer' | 'admin';
+  otp?: string | null;
+  otpExpiresAt?: string | null;
   updatedAt: string;
   createdAt: string;
-  _status?: ('draft' | 'published') | null;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -207,21 +202,6 @@ export interface Page {
 export interface Media {
   id: number;
   alt?: string | null;
-  caption?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -235,22 +215,6 @@ export interface Media {
   focalY?: number | null;
   sizes?: {
     thumbnail?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    square?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    small?: {
       url?: string | null;
       width?: number | null;
       height?: number | null;
@@ -274,22 +238,16 @@ export interface Media {
       filesize?: number | null;
       filename?: string | null;
     };
-    xlarge?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
   };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "CallToActionBlock".
+ * via the `definition` "services".
  */
-export interface CallToActionBlock {
-  richText?: {
+export interface Service {
+  id: number;
+  serviceName: string;
+  description?: {
     root: {
       type: string;
       children: {
@@ -304,403 +262,19 @@ export interface CallToActionBlock {
     };
     [k: string]: unknown;
   } | null;
-  links?:
-    | {
-        link: {
-          type?: ('reference' | 'custom') | null;
-          newTab?: boolean | null;
-          reference?: {
-            relationTo: 'pages';
-            value: number | Page;
-          } | null;
-          url?: string | null;
-          label: string;
-          /**
-           * Choose how the link should be rendered.
-           */
-          appearance?: ('default' | 'outline') | null;
-        };
-        id?: string | null;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'cta';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ContentBlock".
- */
-export interface ContentBlock {
-  columns?:
-    | {
-        size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
-        richText?: {
-          root: {
-            type: string;
-            children: {
-              type: any;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
-        enableLink?: boolean | null;
-        link?: {
-          type?: ('reference' | 'custom') | null;
-          newTab?: boolean | null;
-          reference?: {
-            relationTo: 'pages';
-            value: number | Page;
-          } | null;
-          url?: string | null;
-          label: string;
-          /**
-           * Choose how the link should be rendered.
-           */
-          appearance?: ('default' | 'outline') | null;
-        };
-        id?: string | null;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'content';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "MediaBlock".
- */
-export interface MediaBlock {
-  media: number | Media;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'mediaBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ArchiveBlock".
- */
-export interface ArchiveBlock {
-  introContent?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  populateBy?: ('collection' | 'selection') | null;
-  relationTo?: 'posts' | null;
-  categories?: (number | Category)[] | null;
-  limit?: number | null;
-  selectedDocs?:
-    | {
-        relationTo: 'posts';
-        value: number | Post;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'archive';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories".
- */
-export interface Category {
-  id: number;
-  title: string;
-  parent?: (number | null) | Category;
-  breadcrumbs?:
-    | {
-        doc?: (number | null) | Category;
-        url?: string | null;
-        label?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
- */
-export interface Post {
-  id: number;
-  title: string;
-  content: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  relatedPosts?: (number | Post)[] | null;
-  categories?: (number | Category)[] | null;
-  meta?: {
-    title?: string | null;
-    /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
-     */
-    image?: (number | null) | Media;
-    description?: string | null;
-  };
-  publishedAt?: string | null;
-  authors?: (number | User)[] | null;
-  populatedAuthors?:
-    | {
-        id?: string | null;
-        name?: string | null;
-      }[]
-    | null;
-  slug?: string | null;
-  slugLock?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: number;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "FormBlock".
- */
-export interface FormBlock {
-  form: number | Form;
-  enableIntro?: boolean | null;
-  introContent?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'formBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "forms".
- */
-export interface Form {
-  id: number;
-  title: string;
-  fields?:
-    | (
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            required?: boolean | null;
-            defaultValue?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'checkbox';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'country';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'email';
-          }
-        | {
-            message?: {
-              root: {
-                type: string;
-                children: {
-                  type: any;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            } | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'message';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            defaultValue?: number | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'number';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            defaultValue?: string | null;
-            placeholder?: string | null;
-            options?:
-              | {
-                  label: string;
-                  value: string;
-                  id?: string | null;
-                }[]
-              | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'select';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'state';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            defaultValue?: string | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'text';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            defaultValue?: string | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'textarea';
-          }
-      )[]
-    | null;
-  submitButtonLabel?: string | null;
   /**
-   * Choose whether to display an on-page message or redirect to a different page after they submit the form.
+   * Inactive services are hidden in the booking wizard
    */
-  confirmationType?: ('message' | 'redirect') | null;
-  confirmationMessage?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  redirect?: {
-    url: string;
-  };
+  isActive?: boolean | null;
   /**
-   * Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. You can use a wildcard {{*}} to output all data and {{*:table}} to format it as an HTML table in the email.
+   * Base points before tier multiplier is applied
    */
-  emails?:
+  loyaltyPointsAwarded: number;
+  steps?:
     | {
-        emailTo?: string | null;
-        cc?: string | null;
-        bcc?: string | null;
-        replyTo?: string | null;
-        emailFrom?: string | null;
-        subject: string;
-        /**
-         * Enter the message that should be sent in this email.
-         */
-        message?: {
-          root: {
-            type: string;
-            children: {
-              type: any;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
+        stepName: 'Exterior' | 'Engine' | 'Interior';
+        stepDescription?: string | null;
+        stepOrder: number;
         id?: string | null;
       }[]
     | null;
@@ -708,97 +282,351 @@ export interface Form {
   createdAt: string;
 }
 /**
- * Comments submitted by visitors on blog posts
- *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "comments".
+ * via the `definition` "service-variants".
  */
-export interface Comment {
+export interface ServiceVariant {
   id: number;
-  content: string;
-  author: {
-    name: string;
-    email: string;
-  };
-  post: number | Post;
+  service: number | Service;
+  carType: 'Hatchback' | 'Sedan' | 'Luxury Sedan' | 'Crossover / MPV' | '7-Seater SUV' | 'Luxury SUV / Exotic';
+  location: 'Studio' | 'Doorstep';
   /**
-   * Comments must be approved before they appear publicly
+   * Price in PKR
    */
-  isApproved?: boolean | null;
-  publishedAt?: string | null;
+  price: number;
+  durationMinutes: number;
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "redirects".
+ * via the `definition` "slots".
  */
-export interface Redirect {
+export interface Slot {
+  id: number;
+  date: string;
+  /**
+   * HH:MM format e.g. 09:00
+   */
+  startTime: string;
+  /**
+   * HH:MM format. Auto-computed from startTime + duration when using slot templates
+   */
+  endTime: string;
+  /**
+   * Auto-computed from date on save
+   */
+  dayOfWeek?: ('Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun') | null;
+  /**
+   * Set false automatically when currentBookingCount reaches maxBookings
+   */
+  isAvailable?: boolean | null;
+  /**
+   * Manual override — blocks this slot regardless of booking count
+   */
+  isBlockedByAdmin?: boolean | null;
+  maxBookings?: number | null;
+  /**
+   * Managed automatically by the bookings system
+   */
+  currentBookingCount?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slot-templates".
+ */
+export interface SlotTemplate {
+  id: number;
+  dayOfWeek: 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun';
+  /**
+   * HH:MM format e.g. 09:00
+   */
+  startTime: string;
+  /**
+   * HH:MM format e.g. 18:00
+   */
+  endTime: string;
+  /**
+   * Duration of each generated slot in minutes
+   */
+  slotIntervalMinutes?: number | null;
+  /**
+   * Only active templates trigger slot generation on save
+   */
+  isActive?: boolean | null;
+  /**
+   * Slots will be generated from today up to and including this date
+   */
+  generateUntilDate: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bookings".
+ */
+export interface Booking {
   id: number;
   /**
-   * You will need to rebuild the website when changing this field.
+   * Auto-generated BK-XXXXX
    */
-  from: string;
-  to?: {
-    type?: ('reference' | 'custom') | null;
-    reference?:
-      | ({
-          relationTo: 'pages';
-          value: number | Page;
-        } | null)
-      | ({
-          relationTo: 'posts';
-          value: number | Post;
-        } | null);
-    url?: string | null;
-  };
+  bookingReference?: string | null;
+  user: number | User;
+  service: number | Service;
+  serviceVariant: number | ServiceVariant;
+  slot: number | Slot;
+  carModel: string;
+  carYear: string;
+  carColor: string;
+  location: 'Studio' | 'Doorstep';
+  /**
+   * Required when location is Doorstep
+   */
+  doorstepAddress?: string | null;
+  status: 'Pending' | 'Approved' | 'Cancelled' | 'Completed';
+  cancellationRequestedBy?: ('user' | 'admin') | null;
+  cancellationReason?: string | null;
+  voucherApplied?: (number | null) | Voucher;
+  /**
+   * Base price from service variant before any discount
+   */
+  originalPrice?: number | null;
+  /**
+   * Amount discounted via voucher
+   */
+  discountAmount?: number | null;
+  /**
+   * Computed: originalPrice minus discountAmount
+   */
+  finalPrice?: number | null;
+  loyaltyPointsEarned?: number | null;
+  payment?: (number | null) | Payment;
+  whatsappAlertSent?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "form-submissions".
+ * via the `definition` "vouchers".
  */
-export interface FormSubmission {
+export interface Voucher {
   id: number;
-  form: number | Form;
-  submissionData?:
+  /**
+   * Auto-generated VC-XXXXXXXX
+   */
+  code?: string | null;
+  assignedToUser: number | User;
+  /**
+   * Discount percentage applied at checkout
+   */
+  discountPercent?: number | null;
+  validUntil: string;
+  isUsed?: boolean | null;
+  /**
+   * Timestamp of redemption
+   */
+  usedAt?: string | null;
+  source?: 'Referral' | null;
+  /**
+   * The booking that triggered this referral reward
+   */
+  referralBooking?: (number | null) | Booking;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payments".
+ */
+export interface Payment {
+  id: number;
+  booking: number | Booking;
+  method: 'Bank Transfer' | 'Online';
+  /**
+   * Amount in PKR
+   */
+  amount: number;
+  status: 'Pending' | 'Confirmed' | 'Failed';
+  /**
+   * Entered by the customer
+   */
+  bankTransferReferenceNumber?: string | null;
+  /**
+   * Customer uploads payment receipt
+   */
+  bankTransferReceiptImage?: (number | null) | Media;
+  /**
+   * Admin user who confirmed the payment
+   */
+  confirmedByAdmin?: (number | null) | User;
+  confirmedAt?: string | null;
+  /**
+   * Future: online payment gateway reference
+   */
+  gatewayReference?: string | null;
+  /**
+   * Future: raw gateway response payload
+   */
+  gatewayResponse?:
     | {
-        field: string;
-        value: string;
-        id?: string | null;
-      }[]
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
     | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
- * This is a collection of automatically created search results. These results are used by the global site search and will be updated automatically as documents in the CMS are created or updated.
- *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "search".
+ * via the `definition` "notifications".
  */
-export interface Search {
+export interface Notification {
   id: number;
-  title?: string | null;
-  priority?: number | null;
-  doc: {
-    relationTo: 'posts';
-    value: number | Post;
-  };
-  slug?: string | null;
-  meta?: {
-    title?: string | null;
-    description?: string | null;
-    image?: (number | null) | Media;
-  };
-  categories?:
+  user?: (number | null) | User;
+  type:
+    | 'OTP'
+    | 'Booking Confirmed'
+    | 'Booking Cancelled'
+    | 'Payment Confirmed'
+    | 'Reminder'
+    | 'Tier Upgrade'
+    | 'Free Slot Unlocked'
+    | 'Referral Reward'
+    | 'Review Thanks'
+    | 'Cancellation Request Alert';
+  channel: 'WhatsApp' | 'Email';
+  messageBody?: string | null;
+  status?: ('Sent' | 'Failed') | null;
+  sentAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "membership-cards".
+ */
+export interface MembershipCard {
+  id: number;
+  /**
+   * One membership card per customer
+   */
+  user: number | User;
+  currentTier?: ('Beginner' | 'Gold' | 'Platinum') | null;
+  /**
+   * Resets to 0 when a free slot is granted
+   */
+  servicesCompletedInCycle?: number | null;
+  /**
+   * Set true when cycle threshold is reached
+   */
+  freeSlotUnlocked?: boolean | null;
+  /**
+   * Cleared after the free booking is consumed
+   */
+  freeSlotUsed?: boolean | null;
+  /**
+   * Date the current loyalty cycle began
+   */
+  cycleStartDate?: string | null;
+  /**
+   * Cumulative all-time completed service count
+   */
+  totalServicesEver?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "loyalty-transactions".
+ */
+export interface LoyaltyTransaction {
+  id: number;
+  user: number | User;
+  booking: number | Booking;
+  /**
+   * Final points after multiplier applied
+   */
+  pointsEarned: number;
+  tierMultiplierApplied: number;
+  transactionDate: string;
+  /**
+   * Optional admin note
+   */
+  note?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "referral-logs".
+ */
+export interface ReferralLog {
+  id: number;
+  /**
+   * The customer who shared their referral code
+   */
+  referrer: number | User;
+  /**
+   * The new customer who signed up using the referral code
+   */
+  referredUser: number | User;
+  /**
+   * Set when the referral reward is triggered
+   */
+  referredUserFirstBooking?: (number | null) | Booking;
+  /**
+   * The reward voucher created for the referrer
+   */
+  voucherIssued?: (number | null) | Voucher;
+  status?: ('Pending' | 'Rewarded') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reviews".
+ */
+export interface Review {
+  id: number;
+  /**
+   * One review per booking
+   */
+  booking: number | Booking;
+  user: number | User;
+  /**
+   * Auto-generated e.g. SVC-4829-XK. Generated via /api/reviews/generate-token
+   */
+  reviewToken?: string | null;
+  /**
+   * Set when the token is generated
+   */
+  tokenExpiresAt?: string | null;
+  /**
+   * Set true on submission — single-use token
+   */
+  tokenUsed?: boolean | null;
+  /**
+   * Admin must upload a car photo before generating the review token
+   */
+  carPhotoByAdmin?: (number | null) | Media;
+  rating?: number | null;
+  reviewText?: string | null;
+  customerExtraImages?:
     | {
-        relationTo?: string | null;
+        image: number | Media;
         id?: string | null;
-        title?: string | null;
       }[]
     | null;
+  submittedAt?: string | null;
+  /**
+   * Auto-set true on submission
+   */
+  isVerified?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -827,44 +655,60 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
-        relationTo: 'pages';
-        value: number | Page;
-      } | null)
-    | ({
-        relationTo: 'posts';
-        value: number | Post;
+        relationTo: 'users';
+        value: number | User;
       } | null)
     | ({
         relationTo: 'media';
         value: number | Media;
       } | null)
     | ({
-        relationTo: 'categories';
-        value: number | Category;
+        relationTo: 'services';
+        value: number | Service;
       } | null)
     | ({
-        relationTo: 'users';
-        value: number | User;
+        relationTo: 'service-variants';
+        value: number | ServiceVariant;
       } | null)
     | ({
-        relationTo: 'comments';
-        value: number | Comment;
+        relationTo: 'slots';
+        value: number | Slot;
       } | null)
     | ({
-        relationTo: 'redirects';
-        value: number | Redirect;
+        relationTo: 'slot-templates';
+        value: number | SlotTemplate;
       } | null)
     | ({
-        relationTo: 'forms';
-        value: number | Form;
+        relationTo: 'bookings';
+        value: number | Booking;
       } | null)
     | ({
-        relationTo: 'form-submissions';
-        value: number | FormSubmission;
+        relationTo: 'payments';
+        value: number | Payment;
       } | null)
     | ({
-        relationTo: 'search';
-        value: number | Search;
+        relationTo: 'notifications';
+        value: number | Notification;
+      } | null)
+    | ({
+        relationTo: 'membership-cards';
+        value: number | MembershipCard;
+      } | null)
+    | ({
+        relationTo: 'loyalty-transactions';
+        value: number | LoyaltyTransaction;
+      } | null)
+    | ({
+        relationTo: 'vouchers';
+        value: number | Voucher;
+      } | null)
+    | ({
+        relationTo: 'referral-logs';
+        value: number | ReferralLog;
+      } | null)
+    | ({
+        relationTo: 'reviews';
+        value: number | Review;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -910,168 +754,36 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pages_select".
+ * via the `definition` "users_select".
  */
-export interface PagesSelect<T extends boolean = true> {
-  title?: T;
-  hero?:
-    | T
-    | {
-        type?: T;
-        richText?: T;
-        links?:
-          | T
-          | {
-              link?:
-                | T
-                | {
-                    type?: T;
-                    newTab?: T;
-                    reference?: T;
-                    url?: T;
-                    label?: T;
-                    appearance?: T;
-                  };
-              id?: T;
-            };
-        media?: T;
-      };
-  layout?:
-    | T
-    | {
-        cta?: T | CallToActionBlockSelect<T>;
-        content?: T | ContentBlockSelect<T>;
-        mediaBlock?: T | MediaBlockSelect<T>;
-        archive?: T | ArchiveBlockSelect<T>;
-        formBlock?: T | FormBlockSelect<T>;
-      };
-  meta?:
-    | T
-    | {
-        title?: T;
-        image?: T;
-        description?: T;
-      };
-  publishedAt?: T;
-  slug?: T;
-  slugLock?: T;
+export interface UsersSelect<T extends boolean = true> {
+  fullName?: T;
+  mobileNumber?: T;
+  whatsappNumber?: T;
+  referralCode?: T;
+  referredBy?: T;
+  loyaltyPointsBalance?: T;
+  currentTier?: T;
+  isActive?: T;
+  role?: T;
+  otp?: T;
+  otpExpiresAt?: T;
   updatedAt?: T;
   createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "CallToActionBlock_select".
- */
-export interface CallToActionBlockSelect<T extends boolean = true> {
-  richText?: T;
-  links?:
-    | T
-    | {
-        link?:
-          | T
-          | {
-              type?: T;
-              newTab?: T;
-              reference?: T;
-              url?: T;
-              label?: T;
-              appearance?: T;
-            };
-        id?: T;
-      };
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ContentBlock_select".
- */
-export interface ContentBlockSelect<T extends boolean = true> {
-  columns?:
-    | T
-    | {
-        size?: T;
-        richText?: T;
-        enableLink?: T;
-        link?:
-          | T
-          | {
-              type?: T;
-              newTab?: T;
-              reference?: T;
-              url?: T;
-              label?: T;
-              appearance?: T;
-            };
-        id?: T;
-      };
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "MediaBlock_select".
- */
-export interface MediaBlockSelect<T extends boolean = true> {
-  media?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ArchiveBlock_select".
- */
-export interface ArchiveBlockSelect<T extends boolean = true> {
-  introContent?: T;
-  populateBy?: T;
-  relationTo?: T;
-  categories?: T;
-  limit?: T;
-  selectedDocs?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "FormBlock_select".
- */
-export interface FormBlockSelect<T extends boolean = true> {
-  form?: T;
-  enableIntro?: T;
-  introContent?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts_select".
- */
-export interface PostsSelect<T extends boolean = true> {
-  title?: T;
-  content?: T;
-  relatedPosts?: T;
-  categories?: T;
-  meta?:
-    | T
-    | {
-        title?: T;
-        image?: T;
-        description?: T;
-      };
-  publishedAt?: T;
-  authors?: T;
-  populatedAuthors?:
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
     | T
     | {
         id?: T;
-        name?: T;
+        createdAt?: T;
+        expiresAt?: T;
       };
-  slug?: T;
-  slugLock?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1079,7 +791,6 @@ export interface PostsSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
-  caption?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1095,26 +806,6 @@ export interface MediaSelect<T extends boolean = true> {
     | T
     | {
         thumbnail?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        square?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        small?:
           | T
           | {
               url?: T;
@@ -1144,31 +835,23 @@ export interface MediaSelect<T extends boolean = true> {
               filesize?: T;
               filename?: T;
             };
-        xlarge?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
       };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories_select".
+ * via the `definition` "services_select".
  */
-export interface CategoriesSelect<T extends boolean = true> {
-  title?: T;
-  parent?: T;
-  breadcrumbs?:
+export interface ServicesSelect<T extends boolean = true> {
+  serviceName?: T;
+  description?: T;
+  isActive?: T;
+  loyaltyPointsAwarded?: T;
+  steps?:
     | T
     | {
-        doc?: T;
-        url?: T;
-        label?: T;
+        stepName?: T;
+        stepDescription?: T;
+        stepOrder?: T;
         id?: T;
       };
   updatedAt?: T;
@@ -1176,233 +859,186 @@ export interface CategoriesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_select".
+ * via the `definition` "service-variants_select".
  */
-export interface UsersSelect<T extends boolean = true> {
-  name?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  email?: T;
-  resetPasswordToken?: T;
-  resetPasswordExpiration?: T;
-  salt?: T;
-  hash?: T;
-  loginAttempts?: T;
-  lockUntil?: T;
-  sessions?:
-    | T
-    | {
-        id?: T;
-        createdAt?: T;
-        expiresAt?: T;
-      };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "comments_select".
- */
-export interface CommentsSelect<T extends boolean = true> {
-  content?: T;
-  author?:
-    | T
-    | {
-        name?: T;
-        email?: T;
-      };
-  post?: T;
-  isApproved?: T;
-  publishedAt?: T;
+export interface ServiceVariantsSelect<T extends boolean = true> {
+  service?: T;
+  carType?: T;
+  location?: T;
+  price?: T;
+  durationMinutes?: T;
   updatedAt?: T;
   createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "redirects_select".
+ * via the `definition` "slots_select".
  */
-export interface RedirectsSelect<T extends boolean = true> {
-  from?: T;
-  to?:
-    | T
-    | {
-        type?: T;
-        reference?: T;
-        url?: T;
-      };
+export interface SlotsSelect<T extends boolean = true> {
+  date?: T;
+  startTime?: T;
+  endTime?: T;
+  dayOfWeek?: T;
+  isAvailable?: T;
+  isBlockedByAdmin?: T;
+  maxBookings?: T;
+  currentBookingCount?: T;
   updatedAt?: T;
   createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "forms_select".
+ * via the `definition` "slot-templates_select".
  */
-export interface FormsSelect<T extends boolean = true> {
-  title?: T;
-  fields?:
-    | T
-    | {
-        checkbox?:
-          | T
-          | {
-              name?: T;
-              label?: T;
-              width?: T;
-              required?: T;
-              defaultValue?: T;
-              id?: T;
-              blockName?: T;
-            };
-        country?:
-          | T
-          | {
-              name?: T;
-              label?: T;
-              width?: T;
-              required?: T;
-              id?: T;
-              blockName?: T;
-            };
-        email?:
-          | T
-          | {
-              name?: T;
-              label?: T;
-              width?: T;
-              required?: T;
-              id?: T;
-              blockName?: T;
-            };
-        message?:
-          | T
-          | {
-              message?: T;
-              id?: T;
-              blockName?: T;
-            };
-        number?:
-          | T
-          | {
-              name?: T;
-              label?: T;
-              width?: T;
-              defaultValue?: T;
-              required?: T;
-              id?: T;
-              blockName?: T;
-            };
-        select?:
-          | T
-          | {
-              name?: T;
-              label?: T;
-              width?: T;
-              defaultValue?: T;
-              placeholder?: T;
-              options?:
-                | T
-                | {
-                    label?: T;
-                    value?: T;
-                    id?: T;
-                  };
-              required?: T;
-              id?: T;
-              blockName?: T;
-            };
-        state?:
-          | T
-          | {
-              name?: T;
-              label?: T;
-              width?: T;
-              required?: T;
-              id?: T;
-              blockName?: T;
-            };
-        text?:
-          | T
-          | {
-              name?: T;
-              label?: T;
-              width?: T;
-              defaultValue?: T;
-              required?: T;
-              id?: T;
-              blockName?: T;
-            };
-        textarea?:
-          | T
-          | {
-              name?: T;
-              label?: T;
-              width?: T;
-              defaultValue?: T;
-              required?: T;
-              id?: T;
-              blockName?: T;
-            };
-      };
-  submitButtonLabel?: T;
-  confirmationType?: T;
-  confirmationMessage?: T;
-  redirect?:
-    | T
-    | {
-        url?: T;
-      };
-  emails?:
-    | T
-    | {
-        emailTo?: T;
-        cc?: T;
-        bcc?: T;
-        replyTo?: T;
-        emailFrom?: T;
-        subject?: T;
-        message?: T;
-        id?: T;
-      };
+export interface SlotTemplatesSelect<T extends boolean = true> {
+  dayOfWeek?: T;
+  startTime?: T;
+  endTime?: T;
+  slotIntervalMinutes?: T;
+  isActive?: T;
+  generateUntilDate?: T;
   updatedAt?: T;
   createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "form-submissions_select".
+ * via the `definition` "bookings_select".
  */
-export interface FormSubmissionsSelect<T extends boolean = true> {
-  form?: T;
-  submissionData?:
-    | T
-    | {
-        field?: T;
-        value?: T;
-        id?: T;
-      };
+export interface BookingsSelect<T extends boolean = true> {
+  bookingReference?: T;
+  user?: T;
+  service?: T;
+  serviceVariant?: T;
+  slot?: T;
+  carModel?: T;
+  carYear?: T;
+  carColor?: T;
+  location?: T;
+  doorstepAddress?: T;
+  status?: T;
+  cancellationRequestedBy?: T;
+  cancellationReason?: T;
+  voucherApplied?: T;
+  originalPrice?: T;
+  discountAmount?: T;
+  finalPrice?: T;
+  loyaltyPointsEarned?: T;
+  payment?: T;
+  whatsappAlertSent?: T;
   updatedAt?: T;
   createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "search_select".
+ * via the `definition` "payments_select".
  */
-export interface SearchSelect<T extends boolean = true> {
-  title?: T;
-  priority?: T;
-  doc?: T;
-  slug?: T;
-  meta?:
+export interface PaymentsSelect<T extends boolean = true> {
+  booking?: T;
+  method?: T;
+  amount?: T;
+  status?: T;
+  bankTransferReferenceNumber?: T;
+  bankTransferReceiptImage?: T;
+  confirmedByAdmin?: T;
+  confirmedAt?: T;
+  gatewayReference?: T;
+  gatewayResponse?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notifications_select".
+ */
+export interface NotificationsSelect<T extends boolean = true> {
+  user?: T;
+  type?: T;
+  channel?: T;
+  messageBody?: T;
+  status?: T;
+  sentAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "membership-cards_select".
+ */
+export interface MembershipCardsSelect<T extends boolean = true> {
+  user?: T;
+  currentTier?: T;
+  servicesCompletedInCycle?: T;
+  freeSlotUnlocked?: T;
+  freeSlotUsed?: T;
+  cycleStartDate?: T;
+  totalServicesEver?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "loyalty-transactions_select".
+ */
+export interface LoyaltyTransactionsSelect<T extends boolean = true> {
+  user?: T;
+  booking?: T;
+  pointsEarned?: T;
+  tierMultiplierApplied?: T;
+  transactionDate?: T;
+  note?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vouchers_select".
+ */
+export interface VouchersSelect<T extends boolean = true> {
+  code?: T;
+  assignedToUser?: T;
+  discountPercent?: T;
+  validUntil?: T;
+  isUsed?: T;
+  usedAt?: T;
+  source?: T;
+  referralBooking?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "referral-logs_select".
+ */
+export interface ReferralLogsSelect<T extends boolean = true> {
+  referrer?: T;
+  referredUser?: T;
+  referredUserFirstBooking?: T;
+  voucherIssued?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reviews_select".
+ */
+export interface ReviewsSelect<T extends boolean = true> {
+  booking?: T;
+  user?: T;
+  reviewToken?: T;
+  tokenExpiresAt?: T;
+  tokenUsed?: T;
+  carPhotoByAdmin?: T;
+  rating?: T;
+  reviewText?: T;
+  customerExtraImages?:
     | T
     | {
-        title?: T;
-        description?: T;
         image?: T;
-      };
-  categories?:
-    | T
-    | {
-        relationTo?: T;
         id?: T;
-        title?: T;
       };
+  submittedAt?: T;
+  isVerified?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1448,22 +1084,94 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "header".
+ * via the `definition` "booking-settings".
  */
-export interface Header {
+export interface BookingSetting {
   id: number;
-  navItems?:
+  /**
+   * Auto-approve bookings when a bank transfer payment is confirmed
+   */
+  autoApproveBankTransfer?: boolean | null;
+  /**
+   * Auto-approve bookings when an online payment is confirmed
+   */
+  autoApproveOnlinePayment?: boolean | null;
+  /**
+   * Discount % for referral reward vouchers
+   */
+  defaultReferralVoucherPercent?: number | null;
+  /**
+   * Days until a newly issued voucher expires
+   */
+  voucherExpiryDays?: number | null;
+  /**
+   * Default slot duration used by slot generator
+   */
+  slotIntervalMinutes?: number | null;
+  /**
+   * Hours before appointment to send WhatsApp reminder
+   */
+  reminderHoursBefore?: number | null;
+  /**
+   * Minutes until a review token expires (default 2880 = 48 hours)
+   */
+  reviewTokenExpiryMinutes?: number | null;
+  loyaltyPointsMultipliers?: {
+    beginnerMultiplier?: number | null;
+    goldMultiplier?: number | null;
+    platinumMultiplier?: number | null;
+  };
+  /**
+   * Shown to customers at bank transfer checkout
+   */
+  bankAccountDetails?: {
+    bankName?: string | null;
+    accountTitle?: string | null;
+    accountNumber?: string | null;
+    /**
+     * IBAN format e.g. PK36SCBL0000001123456702
+     */
+    iban?: string | null;
+    /**
+     * Additional payment instructions shown to customer
+     */
+    instructions?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "membership-tiers".
+ */
+export interface MembershipTier {
+  id: number;
+  /**
+   * Configure the three loyalty tiers. Do not reorder — order must be Beginner → Gold → Platinum.
+   */
+  tiers?:
     | {
-        link: {
-          type?: ('reference' | 'custom') | null;
-          newTab?: boolean | null;
-          reference?: {
-            relationTo: 'pages';
-            value: number | Page;
-          } | null;
-          url?: string | null;
-          label: string;
-        };
+        tierName: 'Beginner' | 'Gold' | 'Platinum';
+        /**
+         * Total completed services required to reach this tier. Use 0 for the default tier.
+         */
+        unlocksAtServiceCount: number;
+        /**
+         * Services completed in current cycle before a free slot is unlocked
+         */
+        freeSlotAtCycleCount: number;
+        /**
+         * Multiplier applied to base loyaltyPointsAwarded on each booking
+         */
+        pointsMultiplier: number;
+        /**
+         * Hex colour for UI badge e.g. #C0A020
+         */
+        badgeColor?: string | null;
+        /**
+         * Shown to customers on their dashboard
+         */
+        description?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -1472,46 +1180,31 @@ export interface Header {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "footer".
+ * via the `definition` "booking-settings_select".
  */
-export interface Footer {
-  id: number;
-  navItems?:
-    | {
-        link: {
-          type?: ('reference' | 'custom') | null;
-          newTab?: boolean | null;
-          reference?: {
-            relationTo: 'pages';
-            value: number | Page;
-          } | null;
-          url?: string | null;
-          label: string;
-        };
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "header_select".
- */
-export interface HeaderSelect<T extends boolean = true> {
-  navItems?:
+export interface BookingSettingsSelect<T extends boolean = true> {
+  autoApproveBankTransfer?: T;
+  autoApproveOnlinePayment?: T;
+  defaultReferralVoucherPercent?: T;
+  voucherExpiryDays?: T;
+  slotIntervalMinutes?: T;
+  reminderHoursBefore?: T;
+  reviewTokenExpiryMinutes?: T;
+  loyaltyPointsMultipliers?:
     | T
     | {
-        link?:
-          | T
-          | {
-              type?: T;
-              newTab?: T;
-              reference?: T;
-              url?: T;
-              label?: T;
-            };
-        id?: T;
+        beginnerMultiplier?: T;
+        goldMultiplier?: T;
+        platinumMultiplier?: T;
+      };
+  bankAccountDetails?:
+    | T
+    | {
+        bankName?: T;
+        accountTitle?: T;
+        accountNumber?: T;
+        iban?: T;
+        instructions?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -1519,21 +1212,18 @@ export interface HeaderSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "footer_select".
+ * via the `definition` "membership-tiers_select".
  */
-export interface FooterSelect<T extends boolean = true> {
-  navItems?:
+export interface MembershipTiersSelect<T extends boolean = true> {
+  tiers?:
     | T
     | {
-        link?:
-          | T
-          | {
-              type?: T;
-              newTab?: T;
-              reference?: T;
-              url?: T;
-              label?: T;
-            };
+        tierName?: T;
+        unlocksAtServiceCount?: T;
+        freeSlotAtCycleCount?: T;
+        pointsMultiplier?: T;
+        badgeColor?: T;
+        description?: T;
         id?: T;
       };
   updatedAt?: T;
@@ -1549,42 +1239,6 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "BannerBlock".
- */
-export interface BannerBlock {
-  style: 'info' | 'warning' | 'error' | 'success';
-  content: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'banner';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "CodeBlock".
- */
-export interface CodeBlock {
-  language?: ('typescript' | 'javascript' | 'css') | null;
-  code: string;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'code';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
