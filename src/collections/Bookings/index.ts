@@ -1,9 +1,9 @@
+import type { BasePayload, CollectionConfig } from 'payload'
 
 import { authenticated } from '../../access/authenticated'
 import { adminOnly } from '../../access/adminOnly'
 import { sendNotification } from '../../lib/notifications'
 import { handleBookingCompleted } from '../../lib/membership'
-import { BasePayload, CollectionConfig } from 'payload'
 
 export const Bookings: CollectionConfig = {
   slug: 'bookings',
@@ -300,6 +300,16 @@ export const Bookings: CollectionConfig = {
           }
 
           if (newStatus === 'Completed') {
+            // Send completion WhatsApp to customer first
+            const completedCtx = await resolveBookingContext(doc, payload)
+            await sendNotification({
+              payload,
+              type: 'Booking Completed',
+              recipientType: 'customer',
+              userId,
+              context: completedCtx,
+            })
+            // Then run loyalty/membership logic
             await handleBookingCompleted(doc.id as number, payload)
           }
         }
@@ -322,6 +332,9 @@ async function resolveBookingContext(
   bookingReference?: string
   serviceName?: string
   carType?: string
+  carModel?: string
+  carYear?: string
+  carColor?: string
   slotDate?: string
   slotStartTime?: string
   slotEndTime?: string
@@ -334,6 +347,9 @@ async function resolveBookingContext(
     bookingReference?: string
     serviceName?: string
     carType?: string
+    carModel?: string
+    carYear?: string
+    carColor?: string
     slotDate?: string
     slotStartTime?: string
     slotEndTime?: string
@@ -345,7 +361,10 @@ async function resolveBookingContext(
     bookingReference: doc.bookingReference as string | undefined,
     location: doc.location as string | undefined,
     finalPrice: doc.finalPrice as number | undefined,
-    carType: doc.carType as string | undefined,
+    // carType resolved from serviceVariant below — doc has no carType field
+    carModel: doc.carModel as string | undefined,
+    carYear: doc.carYear as string | undefined,
+    carColor: doc.carColor as string | undefined,
   }
 
   // Resolve service name

@@ -5,6 +5,11 @@
  * via WhatsApp OTP, not email/password. We verify this JWT directly
  * rather than going through payload.auth(), which requires an email
  * match that may not align with our synthetic email addresses.
+ *
+ * IMPORTANT: Payload's own admin panel also sets a 'payload-token' cookie
+ * using the same PAYLOAD_SECRET. The difference is that Payload's token
+ * encodes `id` as a string, while our OTP token encodes it as a number.
+ * We normalise to number with parseInt() to handle both cases.
  */
 
 import type { BasePayload } from 'payload'
@@ -25,7 +30,8 @@ export interface SessionUser {
 }
 
 interface JwtPayload {
-  id: number
+  // Payload's own admin tokens encode id as string; our OTP tokens as number
+  id: number | string
   email: string
   collection: string
 }
@@ -33,9 +39,6 @@ interface JwtPayload {
 /**
  * Returns the authenticated user from the payload-token cookie,
  * or null if no valid session exists.
- *
- * Verifies the JWT directly with PAYLOAD_SECRET, then fetches the
- * user from the database to get fresh field values.
  */
 export async function getSession(payload: BasePayload): Promise<SessionUser | null> {
   try {
@@ -47,40 +50,48 @@ export async function getSession(payload: BasePayload): Promise<SessionUser | nu
     const secret = process.env.PAYLOAD_SECRET
     if (!secret) return null
 
-    // Verify signature and decode — throws if invalid or expired
+    // Verify signature and decode — returns null if invalid or expired
     let decoded: JwtPayload
     try {
       decoded = jwt.verify(token, secret) as JwtPayload
     } catch {
+      // Token invalid, expired, or tampered
       return null
     }
 
-    if (!decoded.id) return null
+    // Normalise id — Payload admin tokens encode id as string, ours as number
+    const rawId = decoded.id
+    const userId = typeof rawId === 'string' ? parseInt(rawId, 10) : rawId
+    if (!userId || isNaN(userId)) return null
 
     // Fetch fresh user data from DB
-    const user = await payload.findByID({
-      collection: 'users',
-      id: decoded.id,
-      depth: 0,
-      overrideAccess: true,
-    })
+    let user: Record<string, unknown>
+    try {
+      user = (await payload.findByID({
+        collection: 'users',
+        id: userId,
+        depth: 0,
+        overrideAccess: true,
+      })) as unknown as Record<string, unknown>
+    } catch {
+      // User not found or DB error
+      return null
+    }
 
     if (!user) return null
 
-    const u = user as unknown as Record<string, unknown>
-
     // Reject disabled accounts
-    if (u.isActive === false) return null
+    if (user.isActive === false) return null
 
     return {
-      id: u.id as number,
-      fullName: (u.fullName as string | undefined) ?? '',
-      mobileNumber: u.mobileNumber as string | null | undefined,
-      whatsappNumber: u.whatsappNumber as string | null | undefined,
-      role: (u.role as string | undefined) ?? 'customer',
-      currentTier: (u.currentTier as string | undefined) ?? 'Beginner',
-      loyaltyPointsBalance: (u.loyaltyPointsBalance as number | undefined) ?? 0,
-      isActive: (u.isActive as boolean | undefined) ?? true,
+      id: user.id as number,
+      fullName: (user.fullName as string | undefined) ?? '',
+      mobileNumber: user.mobileNumber as string | null | undefined,
+      whatsappNumber: user.whatsappNumber as string | null | undefined,
+      role: (user.role as string | undefined) ?? 'customer',
+      currentTier: (user.currentTier as string | undefined) ?? 'Beginner',
+      loyaltyPointsBalance: (user.loyaltyPointsBalance as number | undefined) ?? 0,
+      isActive: (user.isActive as boolean | undefined) ?? true,
     }
   } catch {
     return null
