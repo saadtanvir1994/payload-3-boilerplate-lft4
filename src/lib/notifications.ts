@@ -24,6 +24,7 @@ export type NotificationType =
   | 'Referral Reward'
   | 'Review Thanks'
   | 'Cancellation Request Alert'
+  | 'Booking Completed'
 
 export type NotificationChannel = 'WhatsApp' | 'Email'
 
@@ -49,13 +50,16 @@ export interface NotificationContext {
   cancellationReason?: string
   otpCode?: string
   carType?: string
+  carModel?: string
+  carYear?: string
+  carColor?: string
 }
 
 // ─── Args ─────────────────────────────────────────────────────────────────────
 
 export interface SendNotificationArgs {
   payload: BasePayload
-  type: NotificationType
+  type: NotificationType  // Change this from the inline union to use your exported type
   channel?: NotificationChannel
   /** Payload user id — used to log and resolve whatsapp number if context not supplied */
   userId?: number
@@ -63,7 +67,6 @@ export interface SendNotificationArgs {
   /** Pre-resolved context — skips DB lookups when data is already in memory */
   context?: NotificationContext
 }
-
 // ─── Message builders ─────────────────────────────────────────────────────────
 
 function buildMessage(
@@ -79,6 +82,9 @@ function buildMessage(
   const location = ctx.location ?? 'N/A'
   const price =
     ctx.finalPrice !== undefined ? `PKR ${ctx.finalPrice.toLocaleString()}` : 'N/A'
+  const car = [ctx.carModel, ctx.carYear, ctx.carColor ? `(${ctx.carColor})` : '']
+    .filter(Boolean).join(' ') || 'N/A'
+  const whatsapp = ctx.customerWhatsapp ?? 'N/A'
 
   switch (type) {
     case 'OTP':
@@ -99,20 +105,21 @@ function buildMessage(
         )
       }
       return (
-        `✅ *Booking Received — Alpha Wheels*\n\n` +
-        `Hi ${name}! We've received your booking. 🎉\n\n` +
+        `✅ *Booking Confirmed — Alpha Wheels*\n\n` +
+        `Hi ${name}! Your booking has been confirmed. 🎉\n\n` +
         `📋 *Booking Details*\n` +
         `━━━━━━━━━━━━━━━━━━━━\n` +
         `🔖 Ref: ${ref}\n` +
         `🔧 Service: ${service}\n` +
-        `🚗 Car Type: ${ctx.carType ?? 'N/A'}\n` +
+        `🚗 Car: ${car}\n` +
+        `🏷 Car Type: ${ctx.carType ?? 'N/A'}\n` +
         `📅 Date: ${date}\n` +
         `⏰ Time: ${time}\n` +
         `📍 Location: ${location}\n` +
         `💰 Amount: ${price}\n` +
         `━━━━━━━━━━━━━━━━━━━━\n\n` +
-        `⏳ *Status: Pending Approval*\n` +
-        `We'll confirm your booking shortly.\n\n` +
+        `✅ *Status: Approved*\n` +
+        `Your booking is confirmed. Please complete your bank transfer if not done yet.\n\n` +
         `📋 *Terms & Conditions*\n` +
         `• Please arrive on time. Late arrivals may result in a shorter service time.\n` +
         `• Ensure your vehicle is accessible and unlocked before the appointment.\n` +
@@ -135,9 +142,17 @@ function buildMessage(
       }
       return (
         `❌ *Booking Cancelled — ${ref}*\n\n` +
-        `Hi ${name}, your booking has been cancelled.\n` +
-        (ctx.cancellationReason ? `Reason: ${ctx.cancellationReason}\n\n` : '\n') +
-        `To rebook, please visit our website or contact us.`
+        `Hi ${name}, your booking has been cancelled.\n\n` +
+        `📋 *Booking Details*\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `🔖 Ref: ${ref}\n` +
+        `🔧 Service: ${service}\n` +
+        `🚗 Car: ${car}\n` +
+        `📅 Date: ${date}\n` +
+        `⏰ Time: ${time}\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        (ctx.cancellationReason ? `\n📝 Reason: ${ctx.cancellationReason}\n` : '') +
+        `\nTo rebook, please visit our website or contact us directly.`
       )
 
     case 'Payment Confirmed':
@@ -194,6 +209,22 @@ function buildMessage(
         `Date: ${date} at ${time}\n` +
         `Reason: ${ctx.cancellationReason ?? 'Not provided'}\n\n` +
         `Please review and action this in the admin panel.`
+      )
+
+    case 'Booking Completed':
+      return (
+        `🎉 *Service Completed — ${ref}*\n\n` +
+        `Hi ${name}, your car detailing service has been completed!\n\n` +
+        `📋 *Summary*\n` +
+        `━━━━━━━━━━━━━━━━━━━━\n` +
+        `🔖 Ref: ${ref}\n` +
+        `🔧 Service: ${service}\n` +
+        `🚗 Car: ${car}\n` +
+        `📍 Location: ${location}\n` +
+        `💰 Amount Paid: ${price}\n` +
+        (ctx.loyaltyPointsEarned ? `⭐ Points Earned: +${ctx.loyaltyPointsEarned}\n` : '') +
+        `━━━━━━━━━━━━━━━━━━━━\n\n` +
+        `Thank you for choosing Alpha Wheels! We hope to see you again soon. 🚗✨`
       )
 
     default:
@@ -277,7 +308,7 @@ export async function sendNotification(args: SendNotificationArgs): Promise<void
       collection: 'notifications',
       data: {
         user: userId ?? undefined,
-        type,
+     type: type as any, 
         channel,
         messageBody: message,
         status: success ? 'Sent' : 'Failed',

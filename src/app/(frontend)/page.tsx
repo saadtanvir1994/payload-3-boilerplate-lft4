@@ -29,13 +29,12 @@ export default function Home() {
       {/* Secondary links */}
       <div className="mt-6 flex gap-6 text-sm text-white/40">
         <Link href="/my/dashboard" className="hover:text-white/70 transition-colors">
-          My Account
+       View Dashboard
         </Link>
-        <Link href="/dashboard" className="hover:text-white/70 transition-colors">
+        {/* <Link href="/dashboard" className="hover:text-white/70 transition-colors">
           Admin
-        </Link>
+        </Link> */}
       </div>
-
     </div>
   )
 }
