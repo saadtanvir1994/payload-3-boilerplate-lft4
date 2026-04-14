@@ -1,87 +1,77 @@
-// storage-adapter-import-placeholder
 import { postgresAdapter } from '@payloadcms/db-postgres'
-
-import sharp from 'sharp' // sharp-import
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import sharp from 'sharp'
 import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 
-import { Categories } from './collections/Categories'
-import { Comments } from './collections/Comments'
-import { Media } from './collections/Media'
-import { Pages } from './collections/Pages'
-import { Posts } from './collections/Posts'
 import { Users } from './collections/Users'
-import { Footer } from './Footer/config'
-import { Header } from './Header/config'
+import { Media } from './collections/Media'
+import { Services } from './collections/Services'
+import { ServiceVariants } from './collections/ServiceVariants'
+import { Slots } from './collections/Slots'
+import { SlotTemplates } from './collections/SlotTemplates'
+import { Bookings } from './collections/Bookings'
+import { Payments } from './collections/Payments'
+import { Notifications } from './collections/Notifications'
+import { MembershipCards } from './collections/MembershipCards'
+import { LoyaltyTransactions } from './collections/LoyaltyTransactions'
+import { Vouchers } from './collections/Vouchers'
+import { ReferralLogs } from './collections/ReferralLogs'
+import { Reviews } from './collections/Reviews'
+import { BookingSettings } from './globals/BookingSettings'
+import { MembershipTiers } from './globals/MembershipTiers'
 import { plugins } from './plugins'
-import { defaultLexical } from '@/fields/defaultLexical'
-import { getServerSideURL } from './utilities/getURL'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfig({
   admin: {
-    components: {
-      // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
-      // Feel free to delete this at any time. Simply remove the line below and the import `BeforeLogin` statement on line 15.
-      beforeLogin: ['@/components/BeforeLogin'],
-      // The `BeforeDashboard` component renders the 'welcome' block that you see after logging into your admin panel.
-      // Feel free to delete this at any time. Simply remove the line below and the import `BeforeDashboard` statement on line 15.
-      beforeDashboard: ['@/components/BeforeDashboard'],
-    },
+    user: Users.slug,
     importMap: {
       baseDir: path.resolve(dirname),
     },
-    user: Users.slug,
-    livePreview: {
-      breakpoints: [
-        {
-          label: 'Mobile',
-          name: 'mobile',
-          width: 375,
-          height: 667,
-        },
-        {
-          label: 'Tablet',
-          name: 'tablet',
-          width: 768,
-          height: 1024,
-        },
-        {
-          label: 'Desktop',
-          name: 'desktop',
-          width: 1440,
-          height: 900,
-        },
-      ],
-    },
   },
-  // This config helps us configure global or default features that the other editors can inherit
-  editor: defaultLexical,
+  editor: lexicalEditor({}),
   db: postgresAdapter({
     pool: {
       connectionString: process.env.DATABASE_URI || '',
     },
   }),
-  collections: [Pages, Posts, Media, Categories, Users, Comments],
-  cors: [getServerSideURL()].filter(Boolean),
-  globals: [Header, Footer],
-  plugins: [
-    ...plugins,
-    // storage-adapter-placeholder
+  collections: [
+    Users,
+    Media,
+    Services,
+    ServiceVariants,
+    Slots,
+    SlotTemplates,
+    Bookings,
+    Payments,
+    Notifications,
+    MembershipCards,
+    LoyaltyTransactions,
+    Vouchers,
+    ReferralLogs,
+    Reviews,
+    // All 14 collections registered — complete
   ],
+  globals: [
+    BookingSettings,
+    MembershipTiers,
+  ],
+  cors: [process.env.NEXT_PUBLIC_SERVER_URL || ''].filter(Boolean),
+  plugins: [...plugins],
   endpoints: [
     {
       path: '/health',
       method: 'get',
-      handler: async (req) => {
-        return new Response('OK', { status: 200 });
-      }
-    }
+      handler: async () => {
+        return new Response('OK', { status: 200 })
+      },
+    },
   ],
-  secret: process.env.PAYLOAD_SECRET,
+  secret: process.env.PAYLOAD_SECRET || '',
   sharp,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
